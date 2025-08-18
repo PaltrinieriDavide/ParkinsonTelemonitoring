@@ -3,9 +3,6 @@
 **Report per l’Esame di Fondamenti di Machine Learning**
 
 **Davide Paltrinieri**  
-Matricola: 165005  
-Ingegneria Informatica  
-Email: 296723@studenti.unimore.it  
 Data: June 2024  
 
 ## Abstract
