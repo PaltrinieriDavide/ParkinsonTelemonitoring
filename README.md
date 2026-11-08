@@ -1,67 +1,67 @@
 # Parkinsons Telemonitoring
 
-**Report per l’Esame di Fondamenti di Machine Learning**
+**Report for the Foundations of Machine Learning Exam**
 
 **Davide Paltrinieri**  
-Data: June 2024  
+Date: June 2024  
 
 ## Abstract
 
-Il seguente documento descrive il percorso e le scelte progettuali adottate per lo creazione del progetto d’esame di Fondamenti di Machine Learning, relativamente all’appello del 17/07/2024.
+This document describes the process and design choices involved in developing the project for the Foundations of Machine Learning exam on 17/07/2024.
 
-## 1 Introduzione al problema
+## 1 Introduction to the problem
 
-Il dataset Parkinsons Telemonitoring raccoglie dati biomedicali riguardanti gli stadi iniziali della malattia del Parkinsons. In particolare, il dataset contiene informazioni relative a 42 diversi pazienti, e per ognuno di essi possiede circa 200 samples, per un totale di 5875. Il principale obiettivo è quello di predire le variabili target motor UPDRS e total UPDRS, le quali fanno riferimento alla scala UPDRS (Unified Parkinson’s Disease Rating Scale), che è una scala comunemente utilizzata per monitorare la progressione della malattia di Parkinson.
+The Parkinsons Telemonitoring dataset contains biomedical data on the early stages of Parkinson’s disease. Specifically, the dataset contains information on 42 patients, with approximately 200 samples per patient and a total of 5875 samples. The main objective is to predict the target variables motor UPDRS and total UPDRS, which refer to the UPDRS (Unified Parkinson’s Disease Rating Scale), a scale commonly used to monitor the progression of Parkinson’s disease.
 
-## 2 Struttura del progetto
+## 2 Project structure
 
-Il progetto è strutturato nel seguente modo:
+The project is organized as follows:
 
 - `train.py`
-- Cartella `pt_dataset`, contenente il dataset (sia in formato `.csv` sia in formato `.data` e `.names`)
-- `data.log`, file di logging contenente tutte le informazioni sui modelli, sull’esecuzione del programma e sui risultati ottenuti passo dopo passo. Ad ogni esecuzione viene pulito e riscritto con le nuove informazioni, e se mancante viene creato.
-- Cartella `graphs`, contenente i grafici generati al termine dell’esecuzione del codice (riportati nel paragrafo 5).
+- The `pt_dataset` folder, which contains the dataset (in `.csv` format as well as in `.data` and `.names` formats)
+- `data.log`, a log file containing all information about the models, program execution, and the results obtained at each step. Each run clears the file and rewrites it with the new information. If the file is missing, the program creates it.
+- The `graphs` folder, which contains the plots generated at the end of the run (shown in Section 5).
 
-Per l’avvio sarà sufficiente mandare in esecuzione `train.py`, anche aggiungendo come parametro il dataset (in caso non venisse inserito il percorso `pt_dataset\parkinsons_updrs.data` verrà considerato come valore di default).
+To get started, run `train.py`, optionally passing the dataset as an argument (if no path is provided, `pt_dataset\parkinsons_updrs.data` is used by default).
 
-## 3 Analisi e gestione dei dati
+## 3 Data analysis and management
 
 ### 3.1 EDA
 
-Come descritto in precedenza il dataset contiene 5875 samples, ognuno dei quali è composto da 20 features principalmente intere (int64) e reali (float64) e una variabile categorica. Di seguito vengono descritte in breve:
+As described above, the dataset contains 5875 samples, each with 20 features. These are primarily integers (int64) and real numbers (float64), with one categorical variable. The features are briefly described below:
 
-- `subject number`, un numero compreso tra 1 e 42 che indica il numero del soggetto identificandolo (int64)
+- `subject number`, an integer between 1 and 42 that identifies the subject (int64)
 - `subject age`
-- `subject gender`, unica feature categorica
-- `test time`, tempo di partecipazione allo studio
-- 16 biomedical measures (tutte float64)
+- `subject gender`, the only categorical feature
+- `test time`, the time spent in the study
+- 16 biomedical measures (all float64)
 
-Una nota importante è che il dataset risulta completo, nessun sample ha valori mancanti. Il dataset è stato suddiviso in Training (70%) e Testing (30%).
+The dataset is complete, with no missing values in any sample. The dataset was split into training (70%) and testing (30%) sets.
 
-### 3.2 Scalamento dei dati
+### 3.2 Data scaling
 
-Analizzando le informazioni contenute nel dataset risulta chiaro che le features hanno scale di valori compresi in range differenti tra loro, per questo motivo ho preferito procedere con un processo di scalamento dei dati, ovvero la **Standardizzazione**.
+An analysis of the dataset showed that the feature values span different ranges, so I chose to scale them using **Standardization**.
 
 ### 3.3 Feature selection
 
-Osservando il numero di features in relazione al numero di samples presenti nel dataset non sembrava essere strettamente necessario un processo di feature selection. Ciononostante, ho preferito procedere con tale operazione, ottenendo un miglioramento nei risultati finali. In particolare, dato che testiamo modelli differenti, ho deciso di adottare una metodologia del tipo Wrapper Method in modo da adattare la feature selection al modello specifico considerato. Inoltre, ho ritenuto opportuno eliminare dal dataset la feature `subject number` perché ritenuta particolarmente inefficace al fine delle predizioni. Quindi, ogni modello descritto al paragrafo 4.2, è stato provato e valutato sia con che senza feature selection. I risultati ottenuti sono stati riportati nel paragrafo 4.3.
+Given the number of features relative to the number of samples in the dataset, feature selection did not seem strictly necessary. I chose to apply it anyway, which improved the final results. Specifically, because we tested different models, I decided to use a wrapper method to tailor feature selection to each model. I also decided to remove the `subject number` feature from the dataset because I considered it particularly ineffective for prediction. Each model described in Section 4.2 was therefore tested and evaluated both with and without feature selection. Section 4.3 reports the results.
 
-## 4 Cross Validation e prova dei modelli
+## 4 Cross-validation and model testing
 
-In questa sezione verranno indicati i modelli testati e le metriche utilizzate, con i relativi risultati generati nella fase di Cross Validation.
+This section presents the models tested, the metrics used, and the corresponding cross-validation results.
 
-### 4.1 Metriche
+### 4.1 Metrics
 
-Per la valutazione dei modelli sono state adottate le seguenti metriche:
+The following metrics were used to evaluate the models:
 
 - `neg mean absolute error`
 - `neg mean squared error`
 - `neg root mean squared error`
 - `r2`
 
-### 4.2 Modelli e iperparametri
+### 4.2 Models and hyperparameters
 
-I modelli provati sono molteplici, ognuno dei quali è stato testato due volte, rispettivamente con e senza feature selection. In particolare, per ogni modello, sono state generate due pipeline: la prima contenente il regressore e un Sequential Feature Selector, la seconda contenente solo il modello. Successivamente, su ciascuna pipeline è stata avviata una grid search con lo scopo di trovare la combinazione migliore di iperparametri che permettesse di generalizzare al meglio i dati. Di seguito vengono mostrati i modelli adottati con i parametri provati:
+Several models were tested, each twice, once with feature selection and once without it. Two pipelines were created for each model. The first contained the regressor and a Sequential Feature Selector. The second contained only the model. A grid search was then run on each pipeline to find the combination of hyperparameters that offered the best generalization. The models and the parameter values tested are shown below:
 
 - **Linear Regression**
 - **K-Nearest Neighbors**  
@@ -73,19 +73,19 @@ I modelli provati sono molteplici, ognuno dei quali è stato testato due volte, 
   - max depth = [10, 20, None]  
   - min samples split = [2, 5]
 - **Random Forest**  
-  - numero estimators = [50, 100, 200]  
+  - number of estimators = [50, 100, 200]  
   - min samples split = [2, 5, 10]
 
-### 4.3 Risultati
+### 4.3 Results
 
 #### 4.3.1 motor UPDRS
 
-In seguito ai processi descritti al paragrafo precedente (4.2) è stato eseguito un processo di cross validation per la scelta del modello ottimale.  
-Nota: le tabelle seguenti riguardano la variabile target motor UPDRS.
+After the steps described in the previous section (4.2), cross-validation was used to select the optimal model.  
+Note: The following tables refer to the motor UPDRS target variable.
 
-**Table 1: motor UPDRS con feature selection**
+**Table 1: motor UPDRS with feature selection**
 
-| Modello               | neg MAE   | neg MSE   | neg RMSE  | R2      |
+| Model                 | neg MAE   | neg MSE   | neg RMSE  | R2      |
 |-----------------------|-----------|-----------|-----------|---------|
 | LinearRegression      | -6.4127   | -57.3823  | -7.5722   | 0.1370  |
 | KNeighborsRegressor   | -3.1961   | -21.9084  | -4.6771   | 0.6698  |
@@ -93,9 +93,9 @@ Nota: le tabelle seguenti riguardano la variabile target motor UPDRS.
 | DecisionTreeRegressor | -0.5196   | -3.4268   | -1.8450   | 0.9485  |
 | RandomForestRegressor | -0.6011   | -1.9606   | -1.3972   | 0.9705  |
 
-**Table 2: motor UPDRS senza feature selection**
+**Table 2: motor UPDRS without feature selection**
 
-| Modello               | neg MAE   | neg MSE   | neg RMSE  | R2      |
+| Model                 | neg MAE   | neg MSE   | neg RMSE  | R2      |
 |-----------------------|-----------|-----------|-----------|---------|
 | LinearRegression      | -6.3639   | -56.8181  | -7.5341   | 0.1456  |
 | KNeighborsRegressor   | -3.1725   | -24.2967  | -4.9276   | 0.6343  |
@@ -105,9 +105,9 @@ Nota: le tabelle seguenti riguardano la variabile target motor UPDRS.
 
 #### 4.3.2 total UPDRS
 
-**Table 3: total UPDRS con feature selection**
+**Table 3: total UPDRS with feature selection**
 
-| Modello               | neg MAE   | neg MSE   | neg RMSE  | R2      |
+| Model                 | neg MAE   | neg MSE   | neg RMSE  | R2      |
 |-----------------------|-----------|-----------|-----------|---------|
 | LinearRegression      | -8.1429   | -97.1317  | -9.8520   | 0.1580  |
 | KNeighborsRegressor   | -4.1199   | -37.5284  | -6.1237   | 0.6737  |
@@ -115,9 +115,9 @@ Nota: le tabelle seguenti riguardano la variabile target motor UPDRS.
 | DecisionTreeRegressor | -0.6273   | -5.2887   | -2.2959   | 0.9541  |
 | RandomForestRegressor | -0.8147   | -3.5844   | -1.8894   | 0.9689  |
 
-**Table 4: total UPDRS senza feature selection**
+**Table 4: total UPDRS without feature selection**
 
-| Modello               | neg MAE   | neg MSE   | neg RMSE  | R2      |
+| Model                 | neg MAE   | neg MSE   | neg RMSE  | R2      |
 |-----------------------|-----------|-----------|-----------|---------|
 | LinearRegression      | -8.1095   | -96.3776  | -9.8134   | 0.1645  |
 | KNeighborsRegressor   | -4.2663   | -44.9509  | -6.7042   | 0.6098  |
@@ -125,11 +125,11 @@ Nota: le tabelle seguenti riguardano la variabile target motor UPDRS.
 | DecisionTreeRegressor | -0.9981   | -10.3635  | -3.1671   | 0.9093  |
 | RandomForestRegressor | -1.0690   | -4.5575   | -2.1306   | 0.9604  |
 
-## 5 Conclusioni
+## 5 Conclusions
 
-In questa sezione andiamo a trarre le conclusioni prendendo in considerazione le informazioni e i dati osservati in precedenza. Prestando attenzione alle metriche riportate nelle tabelle possiamo facilmente notare un notevole miglioramento nei risultati quando si utilizzano modelli come il Decision Tree e il Random Forset. Per una migliore visualizzazione si possono prendere in considerazione i due grafici successivi. Questi rappresentano, rispettivamente per motor UPDRS e total UPDRS, un insieme di punti, dove la coordinata x indica la variabile target predetta sul dataset di testing, mentre la coordinata y indica la variabile target effettiva del dataset di testing. Quindi un modello sarà più efficace quanto più la linea sarà retta e con un’angolazione di 45°.
+This section draws conclusions from the information and data presented above. The metrics in the tables show a marked improvement in results when using models such as the Decision Tree and Random Forset. The next two plots illustrate this more clearly. They show a set of points for motor UPDRS and total UPDRS, respectively, where the x-coordinate is the predicted target value on the test set and the y-coordinate is the actual target value on the test set. A model is therefore more effective when its points lie closer to a straight line at a 45° angle.
 
-Comunque, è degno di nota il fatto che per entrambe le variabili target il modello ottimale risultante è il Random Forset con feature selection, oltretutto ottenendo valide performance sul dataset di testing. Di seguito i risultati effettivi sul dataset di testing e le feature selezionate:
+It is worth noting that Random Forset with feature selection was the optimal model for both target variables and performed well on the test set. The test set results and selected features are shown below:
 
 **Model motor UPDRS**  
 neg MAE -0.493563360181508  
@@ -137,7 +137,7 @@ neg MSE -1.306831472688216
 neg RMSE -1.1431672986436483  
 R2 0.9799484245181771  
 
-**Table 5: motor UPDRS risultati finali**
+**Table 5: motor UPDRS final results**
 
 **Model total UPDRS**  
 neg MAE -0.566947604651162  
@@ -145,16 +145,16 @@ neg MSE -1.8880643708320002
 neg RMSE -1.3740685466278602  
 R2 0.9832142624649486  
 
-## Grafici e Visualizzazioni
+## Plots and Visualizations
 
-![Grafico Motor UPDRS](motor_UPDRS_RandomForestRegressor_FeatureSelection.png)
+![Motor UPDRS Plot](motor_UPDRS_RandomForestRegressor_FeatureSelection.png)
 
-![Grafico Total UPDRS](total_UPDRS_RandomForestRegressor_FeatureSelection.png)
+![Total UPDRS Plot](total_UPDRS_RandomForestRegressor_FeatureSelection.png)
 
 
-**Table 6: total UPDRS risultati finali**
+**Table 6: total UPDRS final results**
 
-Le feature selezionate sono:
+The selected features are:
 
 - motor UPDRS: age, sex, test time, Jitter(%), Jitter(Abs), Jitter:PPQ5, NHR, RPDE, DFA
 - total UPDRS: age, sex, test time, Jitter(%), Jitter(Abs), Jitter:RAP, Jitter:PPQ5, Jitter:DDP, DFA
